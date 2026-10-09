@@ -66,15 +66,6 @@ graph TD
 
 ---
 
-## 🚧 Limitations & Unimplemented Features
-
-- **Embedded Inline Video Player**:
-  - Instead of an in-app embedded video player (which would require ExoPlayer / Media3 setup and direct video stream URLs), trailer playback leverages a secure YouTube search intent (`https://www.youtube.com/results?search_query=...`) which opens the YouTube app or browser.
-- **Offline Playback Restriction**:
-  - In accordance with requirements, when the device is offline (`isOffline == true`), the "Play Trailer" button on the details screen is automatically disabled and accompanied by an offline warning message.
-
----
-
 ## 🚀 Future Improvements (If More Time Was Available)
 
 1. **Embedded Media3 Player**:
