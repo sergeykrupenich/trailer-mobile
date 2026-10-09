@@ -50,6 +50,13 @@ dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.ktx)
     kapt(libs.hilt.kapt)
+
+    // Test
+    testImplementation(libs.junit)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.test.turbine)
+    testImplementation(libs.test.coroutines.test)
+    testImplementation(libs.androidx.core.testing)
 }
 
 kapt {
