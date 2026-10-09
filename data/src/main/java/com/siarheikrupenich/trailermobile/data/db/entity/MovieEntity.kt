@@ -14,5 +14,6 @@ data class MovieEntity(
     val releaseDate: String,
     val category: String = "",
     val isFavorite: Boolean = false,
+    val orderIndex: Int = 0,
     val lastUpdated: Long = System.currentTimeMillis()
 )

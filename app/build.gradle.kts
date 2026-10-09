@@ -77,6 +77,9 @@ dependencies {
     implementation(libs.hilt)
     kapt(libs.hilt.kapt)
 
+    // Image Loading
+    implementation(libs.coilCore)
+
     debugImplementation(libs.androidx.ui.tooling)
 }
 

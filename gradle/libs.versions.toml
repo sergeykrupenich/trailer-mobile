@@ -87,6 +87,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
 paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
 paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
+coilCore = { module = "io.coil-kt:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 [plugins]

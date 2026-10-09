@@ -10,5 +10,4 @@ interface TrailerRepository {
     fun getFavoriteMovies(): Flow<List<MovieDto>>
     fun isFavorite(movieId: Long): Flow<Boolean>
     suspend fun toggleFavorite(movie: MovieDto)
-    fun getOfflineStatus(): Flow<Boolean>
 }

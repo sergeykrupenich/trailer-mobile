@@ -8,7 +8,8 @@ import javax.inject.Inject
 data class MovieDtoToEntityParams(
     val dto: MovieDto,
     val category: String = "",
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val orderIndex: Int = 0
 )
 
 class MovieDtoToEntityMapper @Inject constructor() : Mapper<MovieDtoToEntityParams, MovieEntity> {
@@ -24,7 +25,8 @@ class MovieDtoToEntityMapper @Inject constructor() : Mapper<MovieDtoToEntityPara
             voteAverage = dto.voteAverage ?: 0.0,
             releaseDate = dto.releaseDate.orEmpty(),
             category = param.category,
-            isFavorite = param.isFavorite
+            isFavorite = param.isFavorite,
+            orderIndex = param.orderIndex
         )
     }
 }

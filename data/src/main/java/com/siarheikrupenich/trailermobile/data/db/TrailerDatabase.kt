@@ -7,7 +7,7 @@ import com.siarheikrupenich.trailermobile.data.db.entity.MovieEntity
 
 @Database(
     entities = [MovieEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class TrailerDatabase : RoomDatabase() {

@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.okHttp)
     implementation(libs.retrofit.converterGson)
     implementation(libs.loggingInterceptor)
+    implementation(libs.coilCore)
 
     // DI
     implementation(libs.hilt)

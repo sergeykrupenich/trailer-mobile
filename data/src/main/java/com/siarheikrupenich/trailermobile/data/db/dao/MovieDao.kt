@@ -20,10 +20,10 @@ interface MovieDao {
     @Query("SELECT * FROM movies WHERE id = :movieId LIMIT 1")
     suspend fun getMovieById(movieId: Long): MovieEntity?
 
-    @Query("SELECT * FROM movies WHERE category = :category ORDER BY id ASC")
+    @Query("SELECT * FROM movies WHERE category = :category ORDER BY orderIndex ASC, id ASC")
     fun getMoviesByCategory(category: String): Flow<List<MovieEntity>>
 
-    @Query("SELECT * FROM movies WHERE category = :category ORDER BY id ASC")
+    @Query("SELECT * FROM movies WHERE category = :category ORDER BY orderIndex ASC, id ASC")
     suspend fun getMoviesByCategorySync(category: String): List<MovieEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -41,6 +41,7 @@ interface MovieDao {
             voteAverage = :voteAverage, 
             releaseDate = :releaseDate, 
             category = :category, 
+            orderIndex = :orderIndex,
             lastUpdated = :lastUpdated 
         WHERE id = :id
     """)
@@ -53,6 +54,7 @@ interface MovieDao {
         voteAverage: Double,
         releaseDate: String,
         category: String,
+        orderIndex: Int,
         lastUpdated: Long
     )
 
@@ -70,6 +72,7 @@ interface MovieDao {
                     voteAverage = movie.voteAverage,
                     releaseDate = movie.releaseDate,
                     category = movie.category,
+                    orderIndex = movie.orderIndex,
                     lastUpdated = movie.lastUpdated
                 )
             } else {

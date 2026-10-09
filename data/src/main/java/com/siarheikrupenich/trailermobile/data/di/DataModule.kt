@@ -5,7 +5,9 @@ import androidx.room.Room
 import com.siarheikrupenich.trailermobile.data.api.TrailerApi
 import com.siarheikrupenich.trailermobile.data.db.TrailerDatabase
 import com.siarheikrupenich.trailermobile.data.db.dao.MovieDao
+import com.siarheikrupenich.trailermobile.data.repository.NetworkConnectivityObserverImpl
 import com.siarheikrupenich.trailermobile.data.repository.TrailerRepositoryImpl
+import com.siarheikrupenich.trailermobile.domain.repository.NetworkConnectivityObserver
 import com.siarheikrupenich.trailermobile.domain.repository.TrailerRepository
 import dagger.Binds
 import dagger.Module
@@ -25,6 +27,12 @@ abstract class DataModule {
     abstract fun bindTrailerRepository(
         impl: TrailerRepositoryImpl
     ): TrailerRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNetworkConnectivityObserver(
+        impl: NetworkConnectivityObserverImpl
+    ): NetworkConnectivityObserver
 
     companion object {
         @Provides

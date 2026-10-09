@@ -39,12 +39,6 @@ class TrailerScreenViewModel @Inject constructor(
         .cachedIn(viewModelScope)
 
     init {
-        viewModelScope.launch {
-            getFavoriteMoviesUi(Unit).collect { favorites ->
-                nextEvent(TrailerUiEvent.FavoritesUpdated(favorites.map { it.id }.toSet()))
-            }
-        }
-
         query(TrailerUiEvent.LoadTrailers::class.java) { _ ->
             TrailerState.Loading
         }
@@ -95,6 +89,12 @@ class TrailerScreenViewModel @Inject constructor(
                 isLoading = false,
                 isEmpty = true
             )
+        }
+
+        viewModelScope.launch {
+            getFavoriteMoviesUi(Unit).collect { favorites ->
+                sendResult(TrailerState.FavoritesChanged(favorites.map { it.id }.toSet()))
+            }
         }
 
         nextEvent(TrailerUiEvent.LoadTrailers(isRefreshing = false))

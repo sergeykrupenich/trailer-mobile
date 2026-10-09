@@ -32,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.siarheikrupenich.trailermobile.presentation.R
 import com.siarheikrupenich.trailermobile.presentation.data.TrailerUi
 import com.siarheikrupenich.trailermobile.presentation.trailers.ui.CategoryFilterChips
@@ -192,7 +193,10 @@ private fun TrailerLazyColumn(
     onFavoriteClick: (TrailerUi) -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(count = pagingItems.itemCount) { index ->
+        items(
+            count = pagingItems.itemCount,
+            key = pagingItems.itemKey { it.id }
+        ) { index ->
             pagingItems[index]?.let { trailerUi ->
                 TrailerItem(
                     trailerUi = trailerUi,
