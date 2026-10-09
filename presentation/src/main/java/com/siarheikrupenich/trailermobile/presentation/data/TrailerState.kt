@@ -9,4 +9,5 @@ sealed class TrailerState {
     data class Error(val error: NetworkError, val trailers: List<TrailerUi>? = null) : TrailerState()
     data class Success(val trailers: List<TrailerUi>) : TrailerState()
     data class CategoryChanged(val category: MovieCategory) : TrailerState()
+    data class FavoritesChanged(val favoriteIds: Set<Long>) : TrailerState()
 }

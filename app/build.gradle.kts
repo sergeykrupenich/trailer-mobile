@@ -46,6 +46,7 @@ dependencies {
 
     // Modules
     implementation(project(Modules.core_network))
+    implementation(project(Modules.core_common))
     implementation(project(Modules.domain))
     implementation(project(Modules.data))
     implementation(project(Modules.presentation))
@@ -61,6 +62,7 @@ dependencies {
     // UI & Compose
     implementation(libs.androidx.ui)
     implementation(libs.androidx.material)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -69,6 +71,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose.navigation)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // DI
     implementation(libs.hilt)

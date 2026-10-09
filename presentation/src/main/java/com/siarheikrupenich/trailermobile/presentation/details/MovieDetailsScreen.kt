@@ -18,14 +18,19 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -36,9 +41,14 @@ import java.util.Locale
 
 @Composable
 fun MovieDetailsScreen(
+    movieId: Long,
     onBackClick: () -> Unit,
     viewModel: TrailerDetailsScreenViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(movieId) {
+        viewModel.nextEvent(TrailerDetailsUiEvent.LoadMovieDetails(movieId))
+    }
+
     val uiState by viewModel.uiState.collectAsState()
     val movie = uiState.movie
 
@@ -58,6 +68,16 @@ fun MovieDetailsScreen(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(id = R.string.back_content_description),
                             tint = MaterialTheme.colors.onSurface
+                        )
+                    }
+                },
+                actions = {
+                    if (movie != null) {
+                        MovieFavoriteButton(
+                            isFavorite = uiState.isFavorite,
+                            onToggleFavorite = {
+                                viewModel.nextEvent(TrailerDetailsUiEvent.ToggleFavorite(movie))
+                            }
                         )
                     }
                 },
@@ -102,6 +122,24 @@ fun MovieDetailsScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MovieFavoriteButton(
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit
+) {
+    IconButton(onClick = onToggleFavorite) {
+        Icon(
+            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+            contentDescription = if (isFavorite) {
+                stringResource(id = R.string.favorite_remove_content_description)
+            } else {
+                stringResource(id = R.string.favorite_add_content_description)
+            },
+            tint = if (isFavorite) Color.Red else MaterialTheme.colors.onSurface
+        )
     }
 }
 
@@ -170,6 +208,23 @@ private fun MovieDetailsContent(
             text = movie.description,
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSurface.copy(alpha = 0.9f)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MovieDetailsContentPreview() {
+    MaterialTheme {
+        MovieDetailsContent(
+            movie = TrailerUi(
+                id = 1L,
+                title = "Fight Club",
+                description = "A ticking-time-bomb insomniac and a slippery soap salesman channel maximalist male aggression...",
+                voteAverage = 8.4,
+                releaseDate = "1999-10-15"
+            ),
+            releaseYear = "1999"
         )
     }
 }

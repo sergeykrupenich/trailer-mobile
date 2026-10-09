@@ -16,6 +16,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.PullRefreshState
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
@@ -25,11 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.siarheikrupenich.trailermobile.presentation.R
+import com.siarheikrupenich.trailermobile.presentation.data.TrailerUi
 import com.siarheikrupenich.trailermobile.presentation.trailers.ui.CategoryFilterChips
 import com.siarheikrupenich.trailermobile.presentation.trailers.ui.LoadingState
 import com.siarheikrupenich.trailermobile.presentation.trailers.ui.TrailerEmptyState
@@ -64,104 +68,202 @@ fun TrailerScreen(
             )
         }
     ) { innerPadding ->
-        Column(
+        TrailerContent(
+            uiState = uiState,
+            pagingItems = pagingItems,
+            isRefreshing = isRefreshing,
+            pullRefreshState = pullRefreshState,
+            onCategorySelected = { category ->
+                viewModel.nextEvent(TrailerUiEvent.SelectCategory(category))
+            },
+            onMovieClick = onMovieClick,
+            onFavoriteClick = { movie ->
+                viewModel.nextEvent(TrailerUiEvent.ToggleFavorite(movie))
+            },
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun TrailerContent(
+    uiState: MviTrailerState,
+    pagingItems: LazyPagingItems<TrailerUi>,
+    isRefreshing: Boolean,
+    pullRefreshState: PullRefreshState,
+    onCategorySelected: (com.siarheikrupenich.trailermobile.domain.model.MovieCategory) -> Unit,
+    onMovieClick: (Long) -> Unit,
+    onFavoriteClick: (TrailerUi) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        CategoryFilterChips(
+            selectedCategory = uiState.selectedCategory,
+            onCategorySelected = onCategorySelected,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        TrailerListContainer(
+            uiState = uiState,
+            pagingItems = pagingItems,
+            isRefreshing = isRefreshing,
+            pullRefreshState = pullRefreshState,
+            onMovieClick = onMovieClick,
+            onFavoriteClick = onFavoriteClick,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            CategoryFilterChips(
-                selectedCategory = uiState.selectedCategory,
-                onCategorySelected = { category ->
-                    viewModel.nextEvent(TrailerUiEvent.SelectCategory(category))
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+                .weight(1f)
+        )
+    }
+}
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
-                    .pullRefresh(pullRefreshState)
-            ) {
-                when {
-                    pagingItems.loadState.refresh is LoadState.Loading && pagingItems.itemCount == 0 -> {
-                        LoadingState()
-                    }
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun TrailerListContainer(
+    uiState: MviTrailerState,
+    pagingItems: LazyPagingItems<TrailerUi>,
+    isRefreshing: Boolean,
+    pullRefreshState: PullRefreshState,
+    onMovieClick: (Long) -> Unit,
+    onFavoriteClick: (TrailerUi) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.pullRefresh(pullRefreshState)
+    ) {
+        when {
+            pagingItems.loadState.refresh is LoadState.Loading && pagingItems.itemCount == 0 -> {
+                LoadingState()
+            }
 
-                    pagingItems.loadState.refresh is LoadState.Error && pagingItems.itemCount == 0 -> {
-                        val errorState = pagingItems.loadState.refresh as LoadState.Error
-                        TrailerEmptyState(
-                            stateMessage = errorState.error.localizedMessage
-                                ?: stringResource(id = R.string.common_error_message),
-                            contentDescription = stringResource(id = R.string.error_content_description),
-                            stateImageDrawableRes = R.drawable.ic_error,
-                            buttonTitle = stringResource(id = R.string.retry),
-                            emptyButtonAction = { pagingItems.retry() }
-                        )
-                    }
+            pagingItems.loadState.refresh is LoadState.Error && pagingItems.itemCount == 0 -> {
+                TrailerErrorState(pagingItems)
+            }
 
-                    pagingItems.itemCount == 0 -> {
-                        TrailerEmptyState(
-                            stateMessage = stringResource(id = R.string.empty_state_title),
-                            contentDescription = stringResource(id = R.string.empty_content_description),
-                            stateImageDrawableRes = R.drawable.ic_error,
-                            buttonTitle = stringResource(id = R.string.retry),
-                            emptyButtonAction = { pagingItems.refresh() }
-                        )
-                    }
+            pagingItems.itemCount == 0 -> {
+                TrailerEmptyState(
+                    stateMessage = stringResource(id = R.string.empty_state_title),
+                    contentDescription = stringResource(id = R.string.empty_content_description),
+                    stateImageDrawableRes = R.drawable.ic_error,
+                    buttonTitle = stringResource(id = R.string.retry),
+                    emptyButtonAction = { pagingItems.refresh() }
+                )
+            }
 
-                    else -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(count = pagingItems.itemCount) { index ->
-                                pagingItems[index]?.let { trailerUi ->
-                                    TrailerItem(
-                                        trailerUi = trailerUi,
-                                        onClick = onMovieClick,
-                                    )
-                                }
-                            }
+            else -> {
+                TrailerLazyColumn(
+                    uiState = uiState,
+                    pagingItems = pagingItems,
+                    onMovieClick = onMovieClick,
+                    onFavoriteClick = onFavoriteClick
+                )
+            }
+        }
 
-                            if (pagingItems.loadState.append is LoadState.Loading) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(Size.spacing16),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator()
-                                    }
-                                }
-                            }
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+    }
+}
 
-                            if (pagingItems.loadState.append is LoadState.Error) {
-                                item {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(Size.spacing16),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(
-                                            text = stringResource(id = R.string.common_error_message),
-                                            style = MaterialTheme.typography.caption,
-                                            color = MaterialTheme.colors.error
-                                        )
-                                        Spacer(modifier = Modifier.height(Size.spacing8))
-                                        Button(onClick = { pagingItems.retry() }) {
-                                            Text(text = stringResource(id = R.string.retry))
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+@Composable
+private fun TrailerErrorState(pagingItems: LazyPagingItems<TrailerUi>) {
+    val errorState = pagingItems.loadState.refresh as LoadState.Error
+    TrailerEmptyState(
+        stateMessage = errorState.error.localizedMessage
+            ?: stringResource(id = R.string.common_error_message),
+        contentDescription = stringResource(id = R.string.error_content_description),
+        stateImageDrawableRes = R.drawable.ic_error,
+        buttonTitle = stringResource(id = R.string.retry),
+        emptyButtonAction = { pagingItems.refresh() }
+    )
+}
 
-                PullRefreshIndicator(
-                    refreshing = isRefreshing,
-                    state = pullRefreshState,
-                    modifier = Modifier.align(Alignment.TopCenter)
+@Composable
+private fun TrailerLazyColumn(
+    uiState: MviTrailerState,
+    pagingItems: LazyPagingItems<TrailerUi>,
+    onMovieClick: (Long) -> Unit,
+    onFavoriteClick: (TrailerUi) -> Unit
+) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        items(count = pagingItems.itemCount) { index ->
+            pagingItems[index]?.let { trailerUi ->
+                TrailerItem(
+                    trailerUi = trailerUi,
+                    isFavorite = uiState.favoriteIds.contains(trailerUi.id),
+                    onClick = onMovieClick,
+                    onFavoriteClick = onFavoriteClick
+                )
+            }
+        }
+
+        if (pagingItems.loadState.append is LoadState.Loading) {
+            item {
+                TrailerAppendLoading()
+            }
+        }
+
+        if (pagingItems.loadState.append is LoadState.Error) {
+            item {
+                TrailerAppendError(onRetry = { pagingItems.retry() })
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrailerAppendLoading() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(Size.spacing16),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun TrailerAppendError(onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(Size.spacing16),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(id = R.string.common_error_message),
+            style = MaterialTheme.typography.caption,
+            color = MaterialTheme.colors.error
+        )
+        Spacer(modifier = Modifier.height(Size.spacing8))
+        Button(onClick = onRetry) {
+            Text(text = stringResource(id = R.string.retry))
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TrailerScreenPopulatedPreview() {
+    MaterialTheme {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(2) { index ->
+                TrailerItem(
+                    trailerUi = TrailerUi(
+                        id = index.toLong(),
+                        title = if (index == 0) "Inception" else "The Dark Knight",
+                        description = "A thief who steals corporate secrets through the use of dream-sharing technology...",
+                        voteAverage = if (index == 0) 8.8 else 9.0,
+                        releaseDate = "2010-07-16"
+                    ),
+                    isFavorite = index == 0
                 )
             }
         }
