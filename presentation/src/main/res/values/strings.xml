@@ -21,4 +21,8 @@
     <string name="favorites_empty_title">No favorites added yet</string>
     <string name="favorite_add_content_description">Add to favorites</string>
     <string name="favorite_remove_content_description">Remove from favorites</string>
+
+    <string name="play_trailer">Play Trailer</string>
+    <string name="play_unavailable_offline">Play unavailable while offline</string>
+    <string name="youtube_search_url_format">https://www.youtube.com/results?search_query=%1$s</string>
 </resources>

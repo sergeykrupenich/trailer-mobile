@@ -5,6 +5,7 @@ import com.siarheikrupenich.trailermobile.core.network.data.ResultWithFallback
 import com.siarheikrupenich.trailermobile.presentation.data.TrailerUi
 import com.siarheikrupenich.trailermobile.presentation.usecase.GetMovieDetailsUiParams
 import com.siarheikrupenich.trailermobile.presentation.usecase.GetMovieDetailsUiUseCase
+import com.siarheikrupenich.trailermobile.presentation.usecase.GetOfflineStatusUiUseCase
 import com.siarheikrupenich.trailermobile.presentation.usecase.IsFavoriteUiUseCase
 import com.siarheikrupenich.trailermobile.presentation.usecase.ToggleFavoriteUiUseCase
 import com.siarheikrupenich.trailermobile.viewmodel.ReducerSupportStreamViewModel
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class TrailerDetailsScreenViewModel @Inject constructor(
     private val getMovieDetailsUi: GetMovieDetailsUiUseCase,
     private val isFavoriteUi: IsFavoriteUiUseCase,
-    private val toggleFavoriteUi: ToggleFavoriteUiUseCase
+    private val toggleFavoriteUi: ToggleFavoriteUiUseCase,
+    private val getOfflineStatusUi: GetOfflineStatusUiUseCase
 ) : ReducerSupportStreamViewModel<TrailerDetailsUiEvent, TrailerDetailsState, TrailerDetailsResult>(
     TrailerDetailsState(isLoading = true)
 ) {
@@ -36,7 +38,7 @@ class TrailerDetailsScreenViewModel @Inject constructor(
             when (val result = getMovieDetailsUi(GetMovieDetailsUiParams(event.movieId))) {
                 is ResultWithFallback.Success -> TrailerDetailsResult.Success(result.data)
                 is ResultWithFallback.Failure -> TrailerDetailsResult.Error(
-                    result.error.message ?: "Failed to load movie details"
+                    result.error.message ?: FAIL_PLACEHOLDER
                 )
             }
         }
@@ -66,6 +68,20 @@ class TrailerDetailsScreenViewModel @Inject constructor(
         reducer(TrailerDetailsResult.FavoriteStatusChanged::class.java) { state, result ->
             state.copy(isFavorite = result.isFavorite)
         }
+
+        reducer(TrailerDetailsResult.OfflineStatusChanged::class.java) { state, result ->
+            state.copy(isOffline = result.isOffline)
+        }
+
+        viewModelScope.launch {
+            getOfflineStatusUi(Unit).collect { isOffline ->
+                sendResult(TrailerDetailsResult.OfflineStatusChanged(isOffline))
+            }
+        }
+    }
+
+    companion object {
+        private const val FAIL_PLACEHOLDER = "Failed to load movie details"
     }
 }
 
@@ -78,6 +94,7 @@ sealed class TrailerDetailsResult {
     data class Success(val movie: TrailerUi) : TrailerDetailsResult()
     data class Error(val error: String) : TrailerDetailsResult()
     data class FavoriteStatusChanged(val isFavorite: Boolean) : TrailerDetailsResult()
+    data class OfflineStatusChanged(val isOffline: Boolean) : TrailerDetailsResult()
 }
 
 data class TrailerDetailsState(
@@ -85,5 +102,6 @@ data class TrailerDetailsState(
     val movie: TrailerUi? = null,
     val releaseYear: String = "",
     val isFavorite: Boolean = false,
+    val isOffline: Boolean = false,
     val error: String? = null
 )

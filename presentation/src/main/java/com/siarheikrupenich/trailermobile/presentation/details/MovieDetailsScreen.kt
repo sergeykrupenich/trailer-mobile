@@ -1,14 +1,21 @@
 package com.siarheikrupenich.trailermobile.presentation.details
 
+import android.content.Intent
+import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -20,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +46,7 @@ import coil.compose.AsyncImage
 import com.siarheikrupenich.trailermobile.presentation.R
 import com.siarheikrupenich.trailermobile.presentation.data.TrailerUi
 import com.siarheikrupenich.trailermobile.style.Size
+import java.net.URLEncoder
 import java.util.Locale
 
 @Composable
@@ -104,7 +114,8 @@ fun MovieDetailsScreen(
                 movie != null -> {
                     MovieDetailsContent(
                         movie = movie,
-                        releaseYear = uiState.releaseYear
+                        releaseYear = uiState.releaseYear,
+                        isOffline = uiState.isOffline
                     )
                 }
 
@@ -147,6 +158,7 @@ private fun MovieFavoriteButton(
 private fun MovieDetailsContent(
     movie: TrailerUi,
     releaseYear: String,
+    isOffline: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -176,6 +188,11 @@ private fun MovieDetailsContent(
             )
             Spacer(modifier = Modifier.height(Size.spacing16))
         }
+
+        MoviePlayButtonSection(
+            movieTitle = movie.title,
+            isOffline = isOffline
+        )
 
         Text(
             text = movie.title,
@@ -212,6 +229,51 @@ private fun MovieDetailsContent(
     }
 }
 
+@Composable
+private fun MoviePlayButtonSection(
+    movieTitle: String,
+    isOffline: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val query = URLEncoder.encode("$movieTitle trailer", "UTF-8")
+    val youtubeUrl = stringResource(id = R.string.youtube_search_url_format, query)
+
+    Column(modifier = modifier) {
+        Button(
+            onClick = {
+                Intent(Intent.ACTION_VIEW, youtubeUrl.toUri()).apply {
+                    context.startActivity(this)
+                }
+            },
+            enabled = !isOffline,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.primary,
+                contentColor = MaterialTheme.colors.onPrimary
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Filled.PlayArrow,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(Size.spacing8))
+            Text(text = stringResource(id = R.string.play_trailer))
+        }
+
+        if (isOffline) {
+            Spacer(modifier = Modifier.height(Size.spacing4))
+            Text(
+                text = stringResource(id = R.string.play_unavailable_offline),
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.error
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Size.spacing16))
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun MovieDetailsContentPreview() {
@@ -224,7 +286,8 @@ fun MovieDetailsContentPreview() {
                 voteAverage = 8.4,
                 releaseDate = "1999-10-15"
             ),
-            releaseYear = "1999"
+            releaseYear = "1999",
+            isOffline = false
         )
     }
 }
