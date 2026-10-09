@@ -7,4 +7,9 @@
 
     <string name="empty_state_title">No trailers found</string>
     <string name="empty_content_description">"Empty Image"</string>
+
+    <string name="trailers_title">Trailers</string>
+    <string name="category_now_playing">Now Playing</string>
+    <string name="category_upcoming">Upcoming</string>
+    <string name="category_top_rated">Top Rated</string>
 </resources>

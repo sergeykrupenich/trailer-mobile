@@ -9,7 +9,7 @@ class TrailerRepositoryImpl @Inject constructor(
     private val trailerApi: TrailerApi
 ) : TrailerRepository {
 
-    override suspend fun getNowPlayingMovies(page: Int): NowPlayingResponseDto {
-        return trailerApi.getNowPlayingMovies(page = page)
+    override suspend fun getMovies(category: String, page: Int): NowPlayingResponseDto {
+        return trailerApi.getMovies(category = category, page = page)
     }
 }

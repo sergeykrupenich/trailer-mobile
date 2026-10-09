@@ -19,6 +19,8 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.siarheikrupenich.trailermobile.presentation.R
+import com.siarheikrupenich.trailermobile.presentation.trailers.ui.CategoryFilterChips
 import com.siarheikrupenich.trailermobile.presentation.trailers.ui.LoadingState
 import com.siarheikrupenich.trailermobile.presentation.trailers.ui.TrailerEmptyState
 import com.siarheikrupenich.trailermobile.presentation.trailers.ui.TrailerItem
@@ -38,6 +41,7 @@ import com.siarheikrupenich.trailermobile.style.Size
 fun TrailerScreen(
     viewModel: TrailerScreenViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val pagingItems = viewModel.pagedTrailers.collectAsLazyPagingItems()
     val isRefreshing = pagingItems.loadState.refresh is LoadState.Loading && pagingItems.itemCount > 0
     val pullRefreshState = rememberPullRefreshState(
@@ -50,7 +54,7 @@ fun TrailerScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Now Playing Trailers",
+                        text = stringResource(id = R.string.trailers_title),
                         style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold)
                     )
                 },
@@ -59,89 +63,103 @@ fun TrailerScreen(
             )
         }
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .pullRefresh(pullRefreshState)
         ) {
-            when {
-                pagingItems.loadState.refresh is LoadState.Loading && pagingItems.itemCount == 0 -> {
-                    LoadingState()
-                }
+            CategoryFilterChips(
+                selectedCategory = uiState.selectedCategory,
+                onCategorySelected = { category ->
+                    viewModel.nextEvent(TrailerUiEvent.SelectCategory(category))
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                pagingItems.loadState.refresh is LoadState.Error && pagingItems.itemCount == 0 -> {
-                    val errorState = pagingItems.loadState.refresh as LoadState.Error
-                    TrailerEmptyState(
-                        stateMessage = errorState.error.localizedMessage
-                            ?: stringResource(id = R.string.common_error_message),
-                        contentDescription = stringResource(id = R.string.error_content_description),
-                        stateImageDrawableRes = R.drawable.ic_error,
-                        buttonTitle = stringResource(id = R.string.retry),
-                        emptyButtonAction = { pagingItems.retry() }
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .pullRefresh(pullRefreshState)
+            ) {
+                when {
+                    pagingItems.loadState.refresh is LoadState.Loading && pagingItems.itemCount == 0 -> {
+                        LoadingState()
+                    }
 
-                pagingItems.itemCount == 0 && pagingItems.loadState.refresh is LoadState.NotLoading -> {
-                    TrailerEmptyState(
-                        stateMessage = stringResource(id = R.string.empty_state_title),
-                        contentDescription = stringResource(id = R.string.empty_content_description),
-                        stateImageDrawableRes = R.drawable.ic_error,
-                        buttonTitle = stringResource(id = R.string.retry),
-                        emptyButtonAction = { pagingItems.refresh() }
-                    )
-                }
+                    pagingItems.loadState.refresh is LoadState.Error && pagingItems.itemCount == 0 -> {
+                        val errorState = pagingItems.loadState.refresh as LoadState.Error
+                        TrailerEmptyState(
+                            stateMessage = errorState.error.localizedMessage
+                                ?: stringResource(id = R.string.common_error_message),
+                            contentDescription = stringResource(id = R.string.error_content_description),
+                            stateImageDrawableRes = R.drawable.ic_error,
+                            buttonTitle = stringResource(id = R.string.retry),
+                            emptyButtonAction = { pagingItems.retry() }
+                        )
+                    }
 
-                else -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(count = pagingItems.itemCount) { index ->
-                            pagingItems[index]?.let { trailerUi ->
-                                TrailerItem(trailerUi = trailerUi)
-                            }
-                        }
+                    pagingItems.itemCount == 0 -> {
+                        TrailerEmptyState(
+                            stateMessage = stringResource(id = R.string.empty_state_title),
+                            contentDescription = stringResource(id = R.string.empty_content_description),
+                            stateImageDrawableRes = R.drawable.ic_error,
+                            buttonTitle = stringResource(id = R.string.retry),
+                            emptyButtonAction = { pagingItems.refresh() }
+                        )
+                    }
 
-                        if (pagingItems.loadState.append is LoadState.Loading) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(Size.spacing16),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
+                    else -> {
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                            items(count = pagingItems.itemCount) { index ->
+                                pagingItems[index]?.let { trailerUi ->
+                                    TrailerItem(trailerUi = trailerUi)
                                 }
                             }
-                        }
 
-                        if (pagingItems.loadState.append is LoadState.Error) {
-                            item {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(Size.spacing16),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.common_error_message),
-                                        style = MaterialTheme.typography.caption,
-                                        color = MaterialTheme.colors.error
-                                    )
-                                    Spacer(modifier = Modifier.height(Size.spacing8))
-                                    Button(onClick = { pagingItems.retry() }) {
-                                        Text(text = stringResource(id = R.string.retry))
+                            if (pagingItems.loadState.append is LoadState.Loading) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(Size.spacing16),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                            }
+
+                            if (pagingItems.loadState.append is LoadState.Error) {
+                                item {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(Size.spacing16),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.common_error_message),
+                                            style = MaterialTheme.typography.caption,
+                                            color = MaterialTheme.colors.error
+                                        )
+                                        Spacer(modifier = Modifier.height(Size.spacing8))
+                                        Button(onClick = { pagingItems.retry() }) {
+                                            Text(text = stringResource(id = R.string.retry))
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            PullRefreshIndicator(
-                refreshing = isRefreshing,
-                state = pullRefreshState,
-                modifier = Modifier.align(Alignment.TopCenter)
-            )
+                PullRefreshIndicator(
+                    refreshing = isRefreshing,
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+            }
         }
     }
 }
