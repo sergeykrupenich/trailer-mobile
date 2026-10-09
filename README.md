@@ -4,12 +4,6 @@ A modern Android application built with Jetpack Compose, Clean Architecture, and
 
 ---
 
-## 📱 App Demo
-
-Watch the app demo animation [mobile-trailers.gif](mobile-trailers.gif) located in the root directory.
-
----
-
 ## 🛠️ Setup & Configuration
 
 To run the application, you must provide your TMDB API Bearer Token in `local.properties` at the root of the project:
