@@ -1,5 +1,6 @@
 package com.siarheikrupenich.trailermobile.presentation.trailers.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,23 +18,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.siarheikrupenich.trailermobile.presentation.R
 import com.siarheikrupenich.trailermobile.presentation.data.TrailerUi
 import com.siarheikrupenich.trailermobile.style.Size
+import java.util.Locale
 
 @Composable
 internal fun TrailerItem(
     trailerUi: TrailerUi,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (Long) -> Unit = {}
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Size.spacing16, vertical = Size.spacing8),
+            .padding(horizontal = Size.spacing16, vertical = Size.spacing8)
+            .clickable { onClick(trailerUi.id) },
         elevation = 4.dp,
         shape = RoundedCornerShape(Size.spacing8)
     ) {
@@ -69,7 +75,11 @@ internal fun TrailerItem(
                 if (trailerUi.releaseDate.isNotBlank() || trailerUi.voteAverage > 0.0) {
                     Spacer(modifier = Modifier.height(Size.spacing4))
                     Text(
-                        text = "⭐ ${String.format(java.util.Locale.US, "%.1f", trailerUi.voteAverage)} | 📅 ${trailerUi.releaseDate}",
+                        text = stringResource(
+                            id = R.string.movie_rating_release_format,
+                            String.format(Locale.US, "%.1f", trailerUi.voteAverage),
+                            trailerUi.releaseDate
+                        ),
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
                     )

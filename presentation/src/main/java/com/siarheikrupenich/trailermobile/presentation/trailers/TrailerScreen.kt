@@ -39,7 +39,8 @@ import com.siarheikrupenich.trailermobile.style.Size
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TrailerScreen(
-    viewModel: TrailerScreenViewModel = hiltViewModel()
+    viewModel: TrailerScreenViewModel = hiltViewModel(),
+    onMovieClick: (Long) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pagingItems = viewModel.pagedTrailers.collectAsLazyPagingItems()
@@ -113,7 +114,10 @@ fun TrailerScreen(
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(count = pagingItems.itemCount) { index ->
                                 pagingItems[index]?.let { trailerUi ->
-                                    TrailerItem(trailerUi = trailerUi)
+                                    TrailerItem(
+                                        trailerUi = trailerUi,
+                                        onClick = onMovieClick,
+                                    )
                                 }
                             }
 

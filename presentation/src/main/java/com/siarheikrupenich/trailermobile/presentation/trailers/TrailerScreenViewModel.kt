@@ -20,7 +20,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class TrailerScreenViewModel @Inject constructor(
-    getTrailersByCategoryUiUseCase: GetTrailersByCategoryUiUseCase
+    getTrailersByCategoryUi: GetTrailersByCategoryUiUseCase
 ) : ReducerSupportStreamViewModel<TrailerUiEvent, MviTrailerState, TrailerState>(
     MviTrailerState(isLoading = true)
 ) {
@@ -29,7 +29,7 @@ class TrailerScreenViewModel @Inject constructor(
 
     val pagedTrailers: Flow<PagingData<TrailerUi>> = selectedCategory
         .flatMapLatest { category ->
-            getTrailersByCategoryUiUseCase(category)
+            getTrailersByCategoryUi(category)
         }
         .cachedIn(viewModelScope)
 
