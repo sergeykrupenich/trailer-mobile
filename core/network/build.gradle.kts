@@ -1,8 +1,26 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.android)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
+}
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
+val bearerToken = localProperties.getProperty("BEARER_TOKEN") 
+    ?: System.getenv("BEARER_TOKEN") 
+    ?: ""
+
+val formattedBearerToken = if (bearerToken.startsWith("\"") && bearerToken.endsWith("\"")) {
+    bearerToken
+} else {
+    "\"$bearerToken\""
 }
 
 android {
@@ -20,10 +38,12 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://api.github.com\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3/\"")
+            buildConfigField("String", "BEARER_TOKEN", formattedBearerToken)
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://api.github.com\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3/\"")
+            buildConfigField("String", "BEARER_TOKEN", formattedBearerToken)
         }
     }
     buildFeatures {

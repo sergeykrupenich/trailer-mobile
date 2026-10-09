@@ -37,6 +37,20 @@ internal class NetworkModule {
         @Provides
         fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor) = OkHttpClient.Builder()
             .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val rawToken = BuildConfig.BEARER_TOKEN
+                val authHeader = if (rawToken.isBlank()) "" else if (rawToken.startsWith("Bearer ", ignoreCase = true)) {
+                    rawToken
+                } else {
+                    "Bearer $rawToken"
+                }
+                val requestBuilder = chain.request().newBuilder()
+                    .addHeader("accept", "application/json")
+                if (authHeader.isNotBlank()) {
+                    requestBuilder.addHeader("Authorization", authHeader)
+                }
+                chain.proceed(requestBuilder.build())
+            }
             .addInterceptor(loggingInterceptor)
             .build()
 

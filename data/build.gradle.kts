@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.core.ktx)
     implementation(libs.retrofit)
+    implementation(libs.paging.common)
 
     // DB
     implementation(libs.room.runtime)

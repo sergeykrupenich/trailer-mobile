@@ -40,6 +40,7 @@ dependencies {
 
     // Network
     implementation(libs.retrofit)
+    implementation(libs.paging.common)
 
     // DI
     implementation(libs.hilt)

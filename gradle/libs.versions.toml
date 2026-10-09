@@ -41,6 +41,8 @@ mockk = "1.13.16"
 turbine = "1.2.0"
 roomCommon = "2.8.1"
 roomKtx = "2.8.1"
+paging = "3.3.6"
+coil = "2.7.0"
 
 [libraries]
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanistSwiperefresh" }
@@ -81,6 +83,10 @@ test-turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "tu
 test-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
+paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
+paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

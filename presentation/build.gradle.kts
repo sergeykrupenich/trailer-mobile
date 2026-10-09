@@ -67,6 +67,9 @@ dependencies {
     implementation(libs.accompanist.swiperefresh)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.compose)
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
+    implementation(libs.coil.compose)
 
     // DI
     implementation(libs.hilt)

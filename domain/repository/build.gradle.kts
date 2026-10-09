@@ -22,6 +22,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.gson)
+    implementation(libs.paging.common)
 
     implementation(libs.hilt)
     kapt(libs.hilt.kapt)
