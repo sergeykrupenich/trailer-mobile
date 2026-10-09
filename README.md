@@ -64,15 +64,4 @@ graph TD
   - `TrailerRepositoryImplTest` provides comprehensive unit test coverage for `TrailerRepositoryImpl`, verifying success API fetching, caching with preserved favorites, error fallback to local Room cache, exception re-throwing on empty cache, and reactive Flow emissions for favorite movies and favorite status using MockK, Coroutines Test (`runTest`), and Turbine.
   - Run unit tests with: `./gradlew :data:testDebugUnitTest`.
 
----
 
-## 🚀 Future Improvements (If More Time Was Available)
-
-1. **Embedded Media3 Player**:
-   - Integrate Jetpack Media3 (ExoPlayer) or YouTube Android Player API to play trailers directly inline within the app.
-2. **Expanded Test Coverage**:
-   - Add unit tests for Presentation ViewModels, UseCases, and Compose UI / screenshot tests for UI components.
-3. **Theme Toggle**:
-   - Add explicit support for toggling between Light and Dark themes.
-4. **Advanced Search & Filtering**:
-   - Add search bar filtering across all movie categories and favorites.
